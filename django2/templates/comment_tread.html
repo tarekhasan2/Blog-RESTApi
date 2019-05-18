@@ -1,0 +1,38 @@
+{% extends "base.html"%}
+{% load urlify %}
+{% load crispy_forms_tags %}
+{% block content %}
+	<div class="col-sm-12 col-sm-offset-3">
+		
+
+		<p class="mb-0">{{ comment.content }}</p>
+  			<footer>via {{ comment.user}} | {{ comment.timestamp|timesince }} ago | {% if comment.children.count > 0 %}{{ comment.children.count}} Reply{% if comment.children.count > 1 %}s{% endif %} | {% endif %} {% if request.user == comment.user %}<a href="{{ comment.get_delete_url }}">Delete</a>{% endif %}</footer>
+  			<!-- all reply and reply form -->
+  			<div>
+  				{% for reply in comment.children %}
+  				<blockquote class="blockquote">
+  					<p class="mb-0">{{ reply.content }}</p>
+  					<footer>via {{ reply.user}} | {{ reply.timestamp|timesince }} ago {% if request.user == reply.user %}<a href="{{ reply.get_delete_url }}">Delete</a>{% endif %}</footer>
+  				</hr>
+  			</br>
+  				</blockquote>
+
+  				{% endfor %}
+  				{% if request.user.is_authenticated %}
+				<form method="POST" action=".">{% csrf_token %}
+						{{ form|crispy }}
+					<input type="hidden" name="parent_id" value="{{ comment.id }}">
+					<input type="submit" value="Reply" name="" class="btn btn-default">
+				</form>
+				{% else %}
+						<p>You must have to login</p>
+				{% endif %} 
+			</div>
+			
+		
+	</div>
+	</div>
+
+	
+{% endblock content %}
+

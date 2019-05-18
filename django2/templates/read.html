@@ -1,0 +1,81 @@
+{% extends "base.html"%}
+{% load urlify %}
+{% load crispy_forms_tags %}
+{% block content %}
+	<div class="col-sm-12 col-sm-offset-3">
+		{% if item.image %}
+		<img src="{{ item.image.url }}" class="img-fluid"/>
+		{% endif %}
+	<h1>{{item.title}} <small>{% if item.draf %} <span style="color:red;">Draf</span> {% endif %} {{item.publish}}</small></h1>
+
+
+		{{item.updated}}
+		<p>Author : {{item.user}}</p>
+		<p>Read time:{{ item.read_time }}</p>
+	<p><div class="fb-like" data-href="https://developers.facebook.com/docs/plugins/" data-layout="standard" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div></p>
+<!-- 
+	<a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}">Facebook</a>
+	<a href="https://twitter.com/home?status={{ item.content|urlify }}%20{{ request.build_absolute_uri }}">Twitter</a>
+	<a href='https://plus.google.com/share?url={{ request.build_absolute_uri }}'>Google+</a></br>
+	</p>
+	</br>
+-->
+	</br>
+<div class="col-sm-10 col-sm-offset-1 ">
+	<div class="post-detail-item">{{item.get_markdown}}</div>
+		
+
+</br>
+</br>
+	<div>
+		<p>comments</p>
+
+		<!-- all comments and reply form -->
+		{% for comment in comments %}
+			<blockquote class="blockquote">
+  				<p class="mb-0">{{ comment.content }}</p>
+  				<footer><small>via {{ comment.user}} | {{ comment.timestamp|timesince }} ago | {% if comment.children.count > 0 %}{{ comment.children.count}} Reply {% if comment.children.count > 1 %}s{% endif %} | {% endif %} {% if request.user == comment.user %}<a href="{{ comment.get_delete_url }}">Delete</a>{% endif %}| <a href="{{ comment.get_absulte_url }}">Reply</a></small></footer>
+  				<!-- all reply and reply form -->
+  				<div class="comment-reply"  >
+  					{% for reply in comment.children %}
+  					<blockquote class="blockquote">
+  						<p class="mb-0">{{ reply.content }}</p>
+  						<footer>via {{ reply.user}} | {{ reply.timestamp|timesince }} ago</footer>
+  					</blockquote>
+  					{% endfor %}
+  					{% if request.user.is_authenticated %}
+					<form method="POST" action=".">{% csrf_token %}
+						{{ comment_form|crispy }}
+						<input type="hidden" name="parent_id" value="{{ comment.id }}">
+						<input type="submit" value="Reply" name="" class="btn btn-default">
+					</form>
+					{% else %}
+						<p>You must have to login</p>
+					{% endif %} 
+				</div>
+			</blockquote>
+		{% endfor %}
+					<!-- a comments form -->
+		{% if request.user.is_authenticated %}
+		<form method="POST" action=".">{% csrf_token %}
+			{{ comment_form|crispy }}
+			<input type="submit" value="Comment" name="" class="btn btn-default">
+		</form>
+		{% else %}
+		<p>You must have to login</p>
+		{% endif %} 
+	</div>
+		
+
+
+
+	<!-- <div class="fb-comments" data-href='{{ request.build_absolute_uri }}' data-numposts="5"></div> -->
+
+
+	</div>
+
+</div>
+
+	
+{% endblock content %}
+
